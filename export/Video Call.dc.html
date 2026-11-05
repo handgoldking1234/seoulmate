@@ -29,7 +29,7 @@
 
     <sc-if value="{{ notSwapped }}" hint-placeholder-val="{{ true }}">
       <div style="position:absolute;inset:0;background:#e0e0e0">
-        <image-slot id="vc-remote" shape="rect" placeholder="상대방 영상"></image-slot>
+        <image-slot id="vc-remote" shape="rect" placeholder="상대방 영상" src="{{ partnerPhoto }}"></image-slot>
       </div>
     </sc-if>
     <sc-if value="{{ swapped }}" hint-placeholder-val="{{ false }}">
@@ -45,7 +45,7 @@
           <div style="position:absolute;width:168px;height:168px;border-radius:50%;border:1px solid #e2600b;animation:vc-ring 2.4s ease-out infinite"></div>
           <div style="position:absolute;width:168px;height:168px;border-radius:50%;border:1px solid #e2600b;animation:vc-ring 2.4s ease-out 1.2s infinite"></div>
           <div style="width:96px;height:96px;border-radius:50%;overflow:hidden;background:#e4e4e4;box-shadow:0 8px 24px rgba(0,0,0,0.14)">
-            <image-slot id="vc-partner" shape="circle" placeholder="파트너 사진"></image-slot>
+            <image-slot id="vc-partner" shape="circle" placeholder="파트너 사진" src="{{ partnerPhoto }}"></image-slot>
           </div>
         </div>
         <div style="font-size:11px;font-weight:800;letter-spacing:0.18em;color:#c24f00;text-transform:uppercase">{{ readyKicker }}</div>
@@ -112,7 +112,7 @@
           <image-slot id="vc-self" shape="rounded" radius="12" placeholder="내 영상"></image-slot>
         </sc-if>
         <sc-if value="{{ swapped }}" hint-placeholder-val="{{ false }}">
-          <image-slot id="vc-remote" shape="rounded" radius="12" placeholder="상대방 영상"></image-slot>
+          <image-slot id="vc-remote" shape="rounded" radius="12" placeholder="상대방 영상" src="{{ partnerPhoto }}"></image-slot>
         </sc-if>
         <button onClick="{{ toggleSwap }}" title="화면 반전" style="position:absolute;top:6px;left:6px;z-index:3;width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.92);color:#121212;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.2)">
           <div style="width:16px;height:16px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/shuffle.svg);mask-image:url(https://unpkg.com/lucide-static/icons/shuffle.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
@@ -349,6 +349,7 @@ const COPY = {
   }
 };
 
+const PHOTOS = {Alex: "https://randomuser.me/api/portraits/men/32.jpg", Emily: "https://randomuser.me/api/portraits/women/44.jpg", Liam: "https://randomuser.me/api/portraits/men/46.jpg", Sofia: "https://randomuser.me/api/portraits/women/65.jpg", Noah: "https://randomuser.me/api/portraits/men/75.jpg", Mia: "https://randomuser.me/api/portraits/women/68.jpg", Ethan: "https://randomuser.me/api/portraits/men/52.jpg", Hana: "https://randomuser.me/api/portraits/women/90.jpg", Jimin: "https://randomuser.me/api/portraits/women/21.jpg", Soyeon: "https://randomuser.me/api/portraits/women/33.jpg", Minho: "https://randomuser.me/api/portraits/men/11.jpg", Haeun: "https://randomuser.me/api/portraits/women/57.jpg"};
 const ROSTER = {
   ko: [
     { name: "Alex", meta: "한국어 Lv.3" },
@@ -494,6 +495,7 @@ class Component extends DCLogic {
       micLabel: s.mic ? t.micOn : t.micOff,
       camLabel: s.cam ? t.camOn : t.camOff,
       partnerName: partner.name,
+      partnerPhoto: PHOTOS[partner.name] || "",
       partnerMeta: partner.meta,
       readyKicker: t.readyKicker,
       readyTitle: s.persona === "ko" ? partner.name + "와 바로 시작" : "Jump in with " + partner.name,
