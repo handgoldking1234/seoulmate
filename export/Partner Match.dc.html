@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #ebebeb; font-family: 'Manrope', 'Noto Sans KR', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #c24f00; text-decoration: none; }
+  a:hover { color: #e2600b; }
+  .pm-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+  .pm-scroll::-webkit-scrollbar { display: none; width: 0; }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#ebebeb;display:flex;justify-content:center;color:#121212;font-family:'Manrope','Noto Sans KR',sans-serif">
+  <div style="position:relative;width:100%;max-width:430px;min-height:100vh;background:#fbfbfb;display:flex;flex-direction:column;overflow:hidden">
+
+    <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:none;padding:22px 16px 14px">
+        <div style="font-size:11px;font-weight:800;letter-spacing:0.16em;color:#c24f00;text-transform:uppercase">Step 1 · 관심 주제</div>
+        <div style="font-size:24px;font-weight:800;letter-spacing:-0.02em;margin-top:6px;line-height:1.25">관심 있는 주제를<br />3개 이상 골라주세요</div>
+        <div style="font-size:12px;color:#6b6b6b;font-weight:500;margin-top:8px;line-height:1.5">고른 주제로 파트너를 찾고, 통화 중 AI 코치가 이 주제로 질문을 추천해요.</div>
+      </div>
+
+      <div class="pm-scroll" style="flex:1;overflow-y:auto;scrollbar-width:none;padding:0 16px 16px">
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+          <div style="margin-bottom:20px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9b9b9b;text-transform:uppercase;margin-bottom:10px">{{ g.title }}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ g.items }}" as="o" hint-placeholder-count="6">
+                <button onClick="{{ o.pick }}" style="border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:800;padding:12px 16px;border-radius:9999px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.shadow }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="flex:none;padding:12px 16px 22px;background:#fbfbfb;border-top:1px solid #ececec">
+        <button onClick="{{ finishSetup }}" style="width:100%;border:none;font-family:inherit;border-radius:500px;padding:17px;font-size:15px;font-weight:800;background:{{ setupCtaBg }};color:{{ setupCtaFg }};cursor:{{ setupCtaCursor }}">{{ setupCtaLabel }}</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showHeader }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:none;padding:18px 16px 12px;display:flex;flex-direction:column;gap:12px;background:#fbfbfb">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:0.16em;color:#c24f00;text-transform:uppercase">{{ rankLabel }}</div>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-top:3px">파트너 고르기</div>
+        </div>
+        <button onClick="{{ toggleView }}" style="background:#ffffff;border:1px solid #d4d4d4;border-radius:9999px;padding:9px 14px;font-size:12px;font-weight:800;color:#121212;font-family:inherit;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08)" style-hover="border-color:#121212">{{ viewToggleLabel }}</button>
+      </div>
+      <div style="font-size:12px;color:#6b6b6b;font-weight:500;line-height:1.5">{{ headerNote }}</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isBrowse }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:0 16px 20px">
+
+        <div style="flex:none;display:flex;gap:5px;margin-bottom:14px">
+          <sc-for list="{{ pips }}" as="pip" hint-placeholder-count="5">
+            <div style="flex:1;height:3px;border-radius:2px;background:{{ pip.color }}"></div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;min-height:430px;background:#ffffff;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center">
+            <div style="width:56px;height:56px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#9b9b9b">0</div>
+            <div style="font-size:19px;font-weight:800;letter-spacing:-0.01em;margin-top:16px">조건에 맞는 파트너가 없어요</div>
+            <div style="font-size:13px;color:#6b6b6b;line-height:1.6;margin-top:8px;max-width:260px">{{ emptyReason }}</div>
+            <button onClick="{{ relax }}" data-relax="1" style="margin-top:22px;border:none;cursor:pointer;background:#ff6f0f;color:#fff;border-radius:500px;padding:15px 26px;font-size:14px;font-weight:800;font-family:inherit" style-hover="background:#ff8636">{{ relaxLabel }}</button>
+            <button onClick="{{ toggleView }}" style="margin-top:10px;background:none;border:none;color:#6b6b6b;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;padding:6px">조건 직접 고치기</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;flex:1;min-height:430px">
+          <sc-if value="{{ hasNext }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;top:14px;left:10px;right:10px;bottom:14px;background:#ffffff;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.07)"></div>
+          </sc-if>
+
+          <div onPointerDown="{{ dragStart }}" style="position:absolute;inset:0;background:#ffffff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.13);overflow:hidden;display:flex;flex-direction:column;transform:{{ cardTransform }};transition:{{ cardTransition }};touch-action:pan-y;cursor:grab">
+            <div style="flex:none;height:176px;background:{{ cardColor }};position:relative;display:flex;align-items:flex-end;padding:16px">
+              <div style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.92);border-radius:9999px;padding:7px 12px;display:flex;align-items:center;gap:7px">
+                <div style="font-size:11px;font-weight:800;color:#121212">조건 적합도</div>
+                <div style="font-size:15px;font-weight:800;color:#c24f00">{{ scorePct }}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px">
+                <div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#121212;flex:none">{{ initial }}</div>
+                <div style="min-width:0">
+                  <div style="font-size:24px;font-weight:800;letter-spacing:-0.02em;color:#ffffff;text-shadow:0 1px 8px rgba(0,0,0,0.35)">{{ name }}</div>
+                  <div style="font-size:13px;font-weight:700;color:#ffffff;margin-top:2px;text-shadow:0 1px 8px rgba(0,0,0,0.35)">{{ subline }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pm-scroll" style="flex:1;overflow-y:auto;scrollbar-width:none;padding:16px">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ breakdown }}" as="row" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:82px;font-size:12px;font-weight:600;color:#6b6b6b;flex:none">{{ row.label }}</div>
+                    <div style="flex:1;height:5px;border-radius:3px;background:#eeeeee;overflow:hidden">
+                      <div style="width:{{ row.pct }};height:100%;border-radius:3px;background:{{ row.color }}"></div>
+                    </div>
+                    <div style="width:92px;text-align:right;font-size:11px;font-weight:700;color:{{ row.color }};flex:none;line-height:1.3">{{ row.note }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="height:1px;background:#ececec;margin:16px 0"></div>
+
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9b9b9b;text-transform:uppercase;margin-bottom:9px">관심사</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ interests }}" as="it" hint-placeholder-count="3">
+                  <div style="padding:7px 13px;border-radius:9999px;background:{{ it.bg }};color:{{ it.fg }};font-size:12px;font-weight:700">{{ it.label }}</div>
+                </sc-for>
+              </div>
+
+              <div style="margin-top:16px;background:#f4f4f4;border-radius:10px;padding:13px;font-size:12px;line-height:1.55;color:#4a4a4a">{{ bio }}</div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:none;display:flex;align-items:center;gap:10px;margin-top:14px">
+          <button onClick="{{ prev }}" style="width:52px;height:52px;border-radius:50%;background:#f0f0f0;border:none;color:#4a4a4a;font-size:20px;font-weight:800;font-family:inherit;cursor:pointer;flex:none" style-hover="background:#e4e4e4"><div style="width:20px;height:20px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/chevron-left.svg);mask-image:url(https://unpkg.com/lucide-static/icons/chevron-left.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div></button>
+          <button onClick="{{ goCall }}" style="flex:1;border:none;cursor:pointer;background:#ff6f0f;color:#fff;border-radius:500px;padding:17px;font-size:15px;font-weight:800;font-family:inherit;box-shadow:0 8px 20px rgba(255,111,15,0.28)" style-hover="background:#ff8636">{{ ctaLabel }}</button>
+          <button onClick="{{ next }}" style="width:52px;height:52px;border-radius:50%;background:#f0f0f0;border:none;color:#4a4a4a;font-size:20px;font-weight:800;font-family:inherit;cursor:pointer;flex:none" style-hover="background:#e4e4e4"><div style="width:20px;height:20px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/chevron-right.svg);mask-image:url(https://unpkg.com/lucide-static/icons/chevron-right.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div></button>
+        </div>
+        <div style="flex:none;text-align:center;font-size:11px;color:#9b9b9b;margin-top:9px">{{ swipeHint }}</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPrefs }}" hint-placeholder-val="{{ false }}">
+      <div class="pm-scroll" style="flex:1;overflow-y:auto;scrollbar-width:none;padding:0 16px 24px">
+
+        <div style="background:#ffffff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.07)">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:14px;font-weight:800">나의 레벨</div>
+            <div style="font-size:20px;font-weight:800;color:#c24f00">Lv.{{ myLevel }}</div>
+          </div>
+          <div style="font-size:12px;color:#6b6b6b;margin-bottom:14px">{{ levelDesc }}</div>
+          <input type="range" min="1" max="10" step="1" value="{{ myLevel }}" onInput="{{ setLevel }}" style="width:100%;accent-color:#ff6f0f" />
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#9b9b9b;font-weight:700;margin-top:4px">
+            <div>1 기초</div>
+            <div>5 의견 표현</div>
+            <div>10 Fluent</div>
+          </div>
+        </div>
+
+        <div style="background:#ffffff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-top:12px">
+          <div style="font-size:14px;font-weight:800;margin-bottom:3px">파트너 레벨 범위</div>
+          <div style="font-size:12px;color:#6b6b6b;margin-bottom:12px">내 레벨 기준 ±{{ levelSpread }}</div>
+          <div style="display:flex;gap:7px">
+            <sc-for list="{{ spreadOptions }}" as="o" hint-placeholder-count="4">
+              <button onClick="{{ o.pick }}" style="flex:1;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:11px 0;border-radius:9999px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#ffffff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-top:12px">
+          <div style="font-size:14px;font-weight:800;margin-bottom:3px">대화 언어</div>
+          <div style="font-size:12px;color:#6b6b6b;margin-bottom:12px">{{ langDesc }}</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="3">
+              <button onClick="{{ o.pick }}" style="width:100%;text-align:left;border:none;cursor:pointer;font-family:inherit;padding:13px 15px;border-radius:10px;background:{{ o.bg }};color:{{ o.fg }};display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="font-size:13px;font-weight:800">{{ o.label }}</div>
+                <div style="font-size:11px;font-weight:700;opacity:0.8">{{ o.note }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#ffffff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-top:12px">
+          <div style="font-size:14px;font-weight:800;margin-bottom:3px">선호 나이대</div>
+          <div style="font-size:12px;color:#6b6b6b;margin-bottom:12px">여러 개 고를 수 있어요</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ ageOptions }}" as="o" hint-placeholder-count="5">
+              <button onClick="{{ o.pick }}" style="border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:10px 15px;border-radius:9999px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#ffffff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-top:12px">
+          <div style="font-size:14px;font-weight:800;margin-bottom:3px">선호 국적</div>
+          <div style="font-size:12px;color:#6b6b6b;margin-bottom:12px">영어 원어민 기준</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ countryOptions }}" as="o" hint-placeholder-count="6">
+              <button onClick="{{ o.pick }}" style="border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:10px 15px;border-radius:9999px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#ffffff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-top:12px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+            <div style="min-width:0">
+              <div style="font-size:14px;font-weight:800;margin-bottom:3px">조건 적용 방식</div>
+              <div style="font-size:12px;color:#6b6b6b;line-height:1.5">{{ strictDesc }}</div>
+            </div>
+            <button onClick="{{ toggleStrict }}" style="flex:none;width:52px;height:30px;border-radius:9999px;border:none;cursor:pointer;background:{{ strictTrackBg }};position:relative;transition:background 180ms ease-out">
+              <div style="position:absolute;top:3px;left:{{ strictKnobLeft }};width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.25);transition:left 180ms cubic-bezier(0.3,0,0,1)"></div>
+            </button>
+          </div>
+        </div>
+
+        <div style="background:#ffffff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-top:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
+            <div style="font-size:14px;font-weight:800">관심 주제</div>
+            <button onClick="{{ backToSetup }}" style="background:none;border:none;color:#c24f00;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;padding:2px">처음 설정으로</button>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ myInterestOptions }}" as="o" hint-placeholder-count="6">
+              <button onClick="{{ o.pick }}" style="border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:10px 15px;border-radius:9999px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#f4f4f4;border-radius:14px;padding:16px;margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="font-size:12px;color:#4a4a4a;font-weight:600;line-height:1.5">{{ poolSummary }}</div>
+          <div style="font-size:26px;font-weight:800;color:#c24f00;flex:none">{{ poolCount }}</div>
+        </div>
+
+        <button onClick="{{ toggleView }}" data-cta="prefs" style="width:100%;margin-top:14px;border:none;cursor:pointer;background:#ff6f0f;color:#fff;border-radius:500px;padding:17px;font-size:15px;font-weight:800;font-family:inherit;box-shadow:0 8px 20px rgba(255,111,15,0.28)" style-hover="background:#ff8636">이 조건으로 파트너 보기</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCall }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;min-height:0;overflow:hidden">
+        <dc-import name="Video Call" partner-name="{{ name }}" fit-label="조건 적합도 {{ scorePct }}" on-back="{{ backFromCall }}" hint-size="100%,100%"></dc-import>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900},&quot;strictDefault&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;매칭&quot;,&quot;label&quot;:&quot;조건 엄격 적용으로 시작&quot;}}">
+const PEOPLE = [
+  { name: "Alex", country: "미국", age: 24, level: 3, online: true, style: 9, color: "#b03a2e", interests: ["K-food", "Travel", "Daily life", "Restaurants", "Korea travel"], bio: "서울에 두 번 와봤고 부산은 아직 못 가봤어요. 한국어는 드라마로 배우기 시작했습니다." },
+  { name: "Emily", country: "캐나다", age: 31, level: 4, online: true, style: 8, color: "#1e6b5c", interests: ["K-drama", "Music", "Travel", "Books", "Photography", "Cafe", "Design"], bio: "토론토에서 일하는 디자이너. 저녁 시간에 30분씩 꾸준히 이야기하는 걸 좋아해요." },
+  { name: "Liam", country: "영국", age: 27, level: 2, online: false, style: 7, color: "#4a3b8f", interests: ["Gaming", "K-pop", "Sports", "Football", "Webtoon"], bio: "런던 거주. 게임하면서 쓰는 표현부터 배우고 싶어요." },
+  { name: "Sofia", country: "호주", age: 22, level: 5, online: true, style: 9, color: "#8a5a1c", interests: ["Travel", "K-food", "Fashion", "Cooking", "Beauty", "Cafe"], bio: "교환학생으로 연세대에 다녔어요. 한국 음식 얘기라면 끝이 없습니다." },
+  { name: "Noah", country: "미국", age: 35, level: 3, online: false, style: 6, color: "#2d5f8a", interests: ["Work", "Technology", "Sports", "Books", "AI", "Startup"], bio: "업무 영어를 가르치고, 대신 비즈니스 한국어를 배우고 싶어요." },
+  { name: "Mia", country: "뉴질랜드", age: 29, level: 4, online: true, style: 8, color: "#7a2f52", interests: ["K-food", "Fashion", "Daily life", "Cooking", "Pets", "Restaurants"], bio: "오클랜드에서 카페를 해요. 메뉴 이름을 한국어로 읽어보는 게 목표." },
+  { name: "Ethan", country: "아일랜드", age: 41, level: 6, online: true, style: 7, color: "#3b6b3b", interests: ["Movies", "Travel", "Korean culture", "Books", "Korean history", "Philosophy"], bio: "한국 영화를 자막 없이 보는 게 목표입니다. 천천히 또박또박 말해요." },
+  { name: "Hana", country: "미국", age: 19, level: 1, online: true, style: 8, color: "#a0522d", interests: ["K-pop", "K-drama", "Idol fandom", "K-variety", "Study abroad"], bio: "대학 1학년. 아이돌 인터뷰를 알아듣고 싶어서 시작했어요." }
+];
+
+const AGES = [
+  { key: "10s", label: "10대", min: 0, max: 19 },
+  { key: "20s", label: "20대", min: 20, max: 29 },
+  { key: "30s", label: "30대", min: 30, max: 39 },
+  { key: "40s", label: "40대 이상", min: 40, max: 200 }
+];
+const COUNTRIES = ["미국", "영국", "캐나다", "호주", "뉴질랜드", "아일랜드"];
+const GROUPS = [
+  { title: "한국", items: [["K-pop", "K-pop"], ["K-drama", "K-드라마"], ["K-food", "한국 음식"], ["Korean culture", "한국 문화"], ["Korea travel", "한국 여행"], ["Korean study", "한국어 공부"], ["K-variety", "K-예능"], ["Webtoon", "웹툰"], ["Idol fandom", "아이돌 · 팬덤"], ["Korean history", "한국 역사"]] },
+  { title: "문화 · 엔터", items: [["Books", "책"], ["Movies", "영화"], ["Music", "음악"], ["Series", "드라마 · 시리즈"], ["Animation", "애니메이션"], ["Gaming", "게임"], ["Concerts", "공연 · 뮤지컬"], ["Photography", "사진"], ["Art", "미술 · 전시"], ["Podcasts", "팟캐스트"]] },
+  { title: "취미 · 라이프", items: [["Cooking", "요리"], ["Cafe", "카페 · 디저트"], ["Sports", "운동 · 헬스"], ["Running", "러닝"], ["Hiking", "등산"], ["Football", "축구"], ["Baseball", "야구"], ["Yoga", "요가"], ["Pets", "반려동물"], ["Fashion", "패션"], ["Beauty", "뷰티"], ["Camping", "캠핑"], ["Cars", "자동차"], ["Plants", "식물 · 가드닝"]] },
+  { title: "여행 · 일상", items: [["Travel", "여행"], ["Daily life", "일상 대화"], ["City life", "도시 생활"], ["Restaurants", "맛집 탐방"], ["Exchange tips", "언어 교환 팁"], ["Seasons", "날씨 · 계절"]] },
+  { title: "일 · 공부", items: [["Work", "일 · 커리어"], ["Startup", "창업"], ["Technology", "기술 · IT"], ["AI", "AI"], ["Design", "디자인"], ["Marketing", "마케팅"], ["Study abroad", "유학 · 학교"], ["Exams", "시험 준비"], ["Money", "재테크"]] },
+  { title: "사회 · 생각", items: [["Culture gap", "문화 차이"], ["Environment", "환경"], ["Social issues", "사회 이슈"], ["Psychology", "심리"], ["Philosophy", "철학"], ["Future", "미래 이야기"]] }
+];
+const LABELS = {};
+GROUPS.forEach((g) => g.items.forEach((it) => { LABELS[it[0]] = it[1]; }));
+const INTERESTS = Object.keys(LABELS);
+const LEVEL_DESC = ["", "알파벳·기초 단어", "간단한 문장", "일상 대화", "이유 설명", "의견 표현", "상황극", "자연스러운 대화", "추상적 주제", "토론", "원어민 수준"];
+
+class Component extends DCLogic {
+  state = {
+    view: "setup",
+    myLevel: 4,
+    spread: 1,
+    ages: [],
+    countries: [],
+    myInterests: ["K-food", "Travel"],
+    lang: "mix",
+    strict: false,
+    index: 0,
+    dx: 0,
+    dragging: false
+  };
+
+  pill(on) {
+    return { bg: on ? "#ff6f0f" : "#f0f0f0", fg: on ? "#ffffff" : "#4a4a4a" };
+  }
+
+  toggleIn(key, value) {
+    const list = this.state[key];
+    const next = list.indexOf(value) >= 0 ? list.filter((v) => v !== value) : list.concat([value]);
+    this.setState({ [key]: next, index: 0 });
+  }
+
+  scored() {
+    const s = this.state;
+    const ageOk = (p) => !s.ages.length || s.ages.some((k) => {
+      const a = AGES.find((x) => x.key === k);
+      return p.age >= a.min && p.age <= a.max;
+    });
+    const countryOk = (p) => !s.countries.length || s.countries.indexOf(p.country) >= 0;
+
+    const rows = PEOPLE.map((p) => {
+      const gap = Math.abs(p.level - s.myLevel);
+      const levelPts = gap <= s.spread ? 20 : Math.max(0, 20 - (gap - s.spread) * 8);
+      const shared = p.interests.filter((i) => s.myInterests.indexOf(i) >= 0);
+      const interestPts = s.myInterests.length ? Math.round(20 * Math.min(1, shared.length / Math.min(2, s.myInterests.length))) : 12;
+      const countryPts = countryOk(p) ? 12 : 0;
+      const agePts = ageOk(p) ? 10 : 0;
+      const onlinePts = p.online ? 8 : 2;
+      const stylePts = p.style;
+      return {
+        p: p, shared: shared, levelPts: levelPts, interestPts: interestPts,
+        countryPts: countryPts, agePts: agePts, onlinePts: onlinePts, stylePts: stylePts,
+        ageOk: ageOk(p), countryOk: countryOk(p),
+        score: 30 + levelPts + interestPts + countryPts + agePts + onlinePts + stylePts - 10
+      };
+    });
+
+    const pool = s.strict ? rows.filter((r) => r.ageOk && r.countryOk) : rows;
+    return pool.sort((a, b) => b.score - a.score);
+  }
+
+  move(step) {
+    const list = this.scored();
+    if (!list.length) return;
+    const n = (this.state.index + step + list.length) % list.length;
+    this.setState({ index: n, dx: 0, dragging: false });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const list = this.scored();
+    const idx = Math.min(s.index, Math.max(0, list.length - 1));
+    const cur = list[idx];
+
+    const bar = (pts, max, label, note) => ({
+      label: label,
+      pct: Math.round((pts / max) * 100) + "%",
+      color: pts >= max * 0.75 ? "#c24f00" : pts > 0 ? "#b46a00" : "#c4c4c4",
+      note: note
+    });
+
+    const breakdown = cur ? [
+      bar(30, 30, "언어 궁합", "원어민 매칭"),
+      bar(cur.levelPts, 20, "레벨", "Lv." + cur.p.level + " / 내 " + s.myLevel),
+      bar(cur.interestPts, 20, "관심사", cur.shared.length + "개 겹침"),
+      bar(cur.countryPts, 12, "국적", cur.countryOk ? cur.p.country : cur.p.country + " · 조건 외"),
+      bar(cur.agePts, 10, "나이대", cur.ageOk ? cur.p.age + "세" : cur.p.age + "세 · 조건 외"),
+      bar(cur.onlinePts, 8, "접속", cur.p.online ? "접속 중" : "오프라인")
+    ] : [];
+
+    return {
+      isSetup: s.view === "setup",
+      notSetup: s.view !== "setup",
+      showHeader: s.view === "browse" || s.view === "prefs",
+      groups: GROUPS.map((g) => ({
+        title: g.title,
+        items: g.items.map((it) => {
+          const on = s.myInterests.indexOf(it[0]) >= 0;
+          return {
+            label: it[1],
+            bg: on ? "#ff6f0f" : "#ffffff",
+            fg: on ? "#ffffff" : "#4a4a4a",
+            shadow: on ? "0 4px 14px rgba(255,111,15,0.3)" : "0 1px 4px rgba(0,0,0,0.08)",
+            pick: () => this.toggleIn("myInterests", it[0])
+          };
+        })
+      })),
+      setupCtaLabel: s.myInterests.length >= 3
+        ? s.myInterests.length + "개 선택 · 파트너 찾기"
+        : (3 - s.myInterests.length) + "개 더 골라주세요",
+      setupCtaBg: s.myInterests.length >= 3 ? "#ff6f0f" : "#ececec",
+      setupCtaFg: s.myInterests.length >= 3 ? "#ffffff" : "#9b9b9b",
+      setupCtaCursor: s.myInterests.length >= 3 ? "pointer" : "not-allowed",
+      finishSetup: () => { if (s.myInterests.length >= 3) this.setState({ view: "browse", index: 0 }); },
+
+      isBrowse: s.view === "browse",
+      isPrefs: s.view === "prefs",
+      toggleView: () => this.setState({ view: s.view === "browse" ? "prefs" : "browse" }),
+      viewToggleLabel: s.view === "browse" ? "매칭 조건" : "파트너 보기",
+      headerNote: s.view === "browse"
+        ? "카드를 좌우로 넘기면 조건에 맞는 순서대로 다른 파트너가 나와요."
+        : "조건을 바꾸면 순서가 바로 다시 계산됩니다.",
+      rankLabel: list.length
+        ? (idx + 1) + " / " + list.length + " · 조건 적합순 " + Math.max(0, Math.min(100, cur ? cur.score : 0)) + "%"
+        : "조건에 맞는 파트너 없음",
+      scorePct: cur ? Math.max(0, Math.min(100, cur.score)) + "%" : "0%",
+      goCall: () => this.setState({ view: "call" }),
+      isCall: s.view === "call",
+      backFromCall: () => this.setState({ view: "browse" }),
+
+      hasResults: list.length > 0,
+      noResults: list.length === 0,
+      emptyReason: s.strict
+        ? "‘조건 엄격 적용’이 켜져 있어서 " + (s.countries.length ? "선호 국적" : "선호 나이대") + " 조건을 만족하는 파트너가 없습니다."
+        : "선택한 조건이 너무 좁습니다. 나이대나 국적을 넓혀보세요.",
+      relaxLabel: s.strict ? "조건 유연하게 적용하기" : "나이대·국적 조건 비우기",
+      relax: () => this.setState(s.strict ? { strict: false, index: 0 } : { ages: [], countries: [], index: 0 }),
+
+      pips: list.map((r, i) => ({ color: i === idx ? "#ff6f0f" : "#e0e0e0" })),
+      hasNext: list.length > 1,
+
+      name: cur ? cur.p.name : "",
+      initial: cur ? cur.p.name.slice(0, 1) : "",
+      subline: cur ? cur.p.country + " · " + cur.p.age + "세 · 한국어 Lv." + cur.p.level : "",
+      score: cur ? Math.max(0, Math.min(100, cur.score)) : 0,
+      cardColor: cur ? cur.p.color : "#e0e0e0",
+      bio: cur ? cur.p.bio : "조건을 조금 넓혀보세요.",
+      interests: cur ? cur.p.interests.map((i) => {
+        const on = cur.shared.indexOf(i) >= 0;
+        const label = LABELS[i] || i;
+        return { label: on ? label + " · 공통" : label, bg: on ? "#ff6f0f" : "#f0f0f0", fg: on ? "#ffffff" : "#4a4a4a" };
+      }) : [],
+      breakdown: breakdown,
+      ctaLabel: cur ? cur.p.name + "와 영상통화" : "조건 다시 설정",
+      swipeHint: "카드를 드래그하거나 화살표로 넘기세요",
+
+      prev: () => this.move(-1),
+      next: () => this.move(1),
+      cardTransform: s.dragging ? "translateX(" + s.dx + "px) rotate(" + (s.dx / 26) + "deg)" : "translateX(0) rotate(0deg)",
+      cardTransition: s.dragging ? "none" : "transform 220ms cubic-bezier(0.3,0,0,1)",
+      dragStart: (e) => {
+        const x0 = e.clientX;
+        this.setState({ dragging: true, dx: 0 });
+        const move = (ev) => this.setState({ dx: ev.clientX - x0 });
+        const up = (ev) => {
+          window.removeEventListener("pointermove", move);
+          window.removeEventListener("pointerup", up);
+          const d = ev.clientX - x0;
+          if (d < -70) this.move(1);
+          else if (d > 70) this.move(-1);
+          else this.setState({ dragging: false, dx: 0 });
+        };
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", up);
+      },
+
+      langDesc: s.lang === "mix"
+        ? "20분 통화를 절반씩 나눠 씁니다."
+        : s.lang === "en" ? "20분 전체를 영어로 이야기합니다." : "20분 전체를 한국어로 이야기합니다.",
+      langOptions: [
+        { key: "mix", label: "영어 + 한국어", note: "10분 / 10분" },
+        { key: "en", label: "영어만", note: "20분" },
+        { key: "ko", label: "한국어만", note: "20분" }
+      ].map((o) => {
+        const on = s.lang === o.key;
+        return { label: o.label, note: o.note, bg: on ? "#ff6f0f" : "#f4f4f4", fg: on ? "#ffffff" : "#4a4a4a", pick: () => this.setState({ lang: o.key }) };
+      }),
+
+      myLevel: s.myLevel,
+      levelDesc: "Lv." + s.myLevel + " · " + LEVEL_DESC[s.myLevel],
+      setLevel: (e) => this.setState({ myLevel: Number(e.target.value), index: 0 }),
+      levelSpread: s.spread,
+      spreadOptions: [0, 1, 2, 4].map((v) => {
+        const st = this.pill(s.spread === v);
+        return { label: v === 0 ? "동일" : v === 4 ? "상관없음" : "±" + v, bg: st.bg, fg: st.fg, pick: () => this.setState({ spread: v, index: 0 }) };
+      }),
+
+      ageOptions: AGES.map((a) => {
+        const st = this.pill(s.ages.indexOf(a.key) >= 0);
+        return { label: a.label, bg: st.bg, fg: st.fg, pick: () => this.toggleIn("ages", a.key) };
+      }).concat([(() => {
+        const st = this.pill(s.ages.length === 0);
+        return { label: "상관없음", bg: st.bg, fg: st.fg, pick: () => this.setState({ ages: [], index: 0 }) };
+      })()]),
+
+      countryOptions: COUNTRIES.map((c) => {
+        const st = this.pill(s.countries.indexOf(c) >= 0);
+        return { label: c, bg: st.bg, fg: st.fg, pick: () => this.toggleIn("countries", c) };
+      }).concat([(() => {
+        const st = this.pill(s.countries.length === 0);
+        return { label: "상관없음", bg: st.bg, fg: st.fg, pick: () => this.setState({ countries: [], index: 0 }) };
+      })()]),
+
+      myInterestOptions: INTERESTS.map((i) => {
+        const st = this.pill(s.myInterests.indexOf(i) >= 0);
+        return { label: LABELS[i], bg: st.bg, fg: st.fg, pick: () => this.toggleIn("myInterests", i) };
+      }),
+      backToSetup: () => this.setState({ view: "setup" }),
+
+      strict: s.strict,
+      strictDesc: s.strict
+        ? "조건에 맞는 사람만 보여줘요. 후보가 적어질 수 있어요."
+        : "조건에 최대한 맞춰 점수 순으로 보여줘요. 안 맞는 사람도 아래 순위로 나와요.",
+      strictTrackBg: s.strict ? "#ff6f0f" : "#d4d4d4",
+      strictKnobLeft: s.strict ? "25px" : "3px",
+      toggleStrict: () => this.setState({ strict: !s.strict, index: 0 }),
+
+      poolCount: list.length + "명",
+      poolSummary: s.strict ? "지금 조건을 모두 만족하는 파트너" : "조건 점수로 정렬된 파트너"
+    };
+  }
+}
+
+</script>
+</body>
+</html>

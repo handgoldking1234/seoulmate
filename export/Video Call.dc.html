@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: #ebebeb; font-family: 'Manrope', 'Noto Sans KR', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #c24f00; text-decoration: none; }
+  a:hover { color: #e2600b; }
+  .vc-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+  .vc-scroll::-webkit-scrollbar { display: none; width: 0; }
+  @keyframes vc-ring { 0% { transform: scale(0.8); opacity: 0.55; } 100% { transform: scale(1.7); opacity: 0; } }
+  @keyframes vc-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</helmet>
+
+<div style="height:100vh;background:#ebebeb;display:flex;justify-content:center;align-items:stretch;overflow:hidden;color:#121212;font-family:'Manrope','Noto Sans KR',sans-serif">
+  <div style="position:relative;width:100%;max-width:430px;align-self:stretch;background:#fbfbfb;overflow:hidden;display:flex;flex-direction:column">
+
+    <sc-if value="{{ notSwapped }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;background:#e0e0e0">
+        <image-slot id="vc-remote" shape="rect" placeholder="상대방 영상"></image-slot>
+      </div>
+    </sc-if>
+    <sc-if value="{{ swapped }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:#e0e0e0">
+        <image-slot id="vc-self" shape="rect" placeholder="내 영상"></image-slot>
+      </div>
+    </sc-if>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(255,255,255,0.35) 20%,rgba(255,255,255,0) 42%,rgba(255,255,255,0.7) 76%,rgba(255,255,255,0.95) 100%);pointer-events:none"></div>
+
+    <sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;background:#f7f7f7;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px">
+        <div style="position:relative;width:168px;height:168px;display:flex;align-items:center;justify-content:center;margin-bottom:32px">
+          <div style="position:absolute;width:168px;height:168px;border-radius:50%;border:1px solid #e2600b;animation:vc-ring 2.4s ease-out infinite"></div>
+          <div style="position:absolute;width:168px;height:168px;border-radius:50%;border:1px solid #e2600b;animation:vc-ring 2.4s ease-out 1.2s infinite"></div>
+          <div style="width:96px;height:96px;border-radius:50%;overflow:hidden;background:#e4e4e4;box-shadow:0 8px 24px rgba(0,0,0,0.14)">
+            <image-slot id="vc-partner" shape="circle" placeholder="파트너 사진"></image-slot>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:0.18em;color:#c24f00;text-transform:uppercase">{{ readyKicker }}</div>
+        <div style="font-size:27px;font-weight:800;letter-spacing:-0.02em;margin-top:8px;text-align:center;line-height:1.2;color:#121212">{{ readyTitle }}</div>
+        <div style="font-size:14px;color:#6b6b6b;margin-top:8px;font-weight:500;text-align:center">{{ readySubLive }}</div>
+        <div style="width:100%;max-width:300px;margin-top:26px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9b9b9b;text-transform:uppercase;margin-bottom:8px;text-align:center">{{ langPickLabel }}</div>
+          <div style="display:flex;gap:6px;background:#efefef;border-radius:9999px;padding:4px">
+            <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="3">
+              <button onClick="{{ o.pick }}" style="flex:1;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:11px 0;border-radius:9999px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <button onClick="{{ start }}" style="margin-top:18px;width:100%;max-width:300px;border:none;cursor:pointer;background:#ff6f0f;color:#fff;border-radius:500px;padding:17px;font-size:16px;font-weight:800;font-family:inherit;box-shadow:0 8px 20px rgba(255,111,15,0.3)" style-hover="background:#ff8636">{{ startLabel }}</button>
+        <div style="font-size:11px;color:#9b9b9b;margin-top:12px">{{ readyNote }}</div>
+        <sc-if value="{{ hasBack }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ back }}" style="margin-top:16px;background:none;border:none;color:#6b6b6b;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;padding:6px">‹ 파트너 다시 고르기</button>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isConnecting }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:#f7f7f7;z-index:78;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+        <div style="width:56px;height:56px;border-radius:50%;background:#ff6f0f;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;animation:vc-blink 1s ease-in-out infinite">AI</div>
+        <div style="font-size:15px;font-weight:700;color:#121212">{{ connectingLabel }}</div>
+      </div>
+    </sc-if>
+
+    <div style="position:relative;z-index:10;padding:18px 16px 0;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px;background:#ffffff;border-radius:9999px;padding:7px 13px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+          <div style="width:7px;height:7px;border-radius:50%;background:#ff6f0f"></div>
+          <div style="font-size:13px;font-weight:800;color:#121212">{{ partnerName }}</div>
+          <div style="font-size:12px;color:#6b6b6b;font-weight:600">{{ partnerMeta }}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="background:#ffffff;border-radius:9999px;padding:8px 12px;font-size:13px;font-weight:800;color:#121212;font-variant-numeric:tabular-nums;box-shadow:0 2px 8px rgba(0,0,0,0.1)">09:12</div>
+          <button onClick="{{ shuffle }}" title="랜덤 파트너" style="background:#ffffff;border:1px solid #d4d4d4;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#121212;font-family:inherit;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08)" style-hover="border-color:#121212">
+            <div style="width:15px;height:15px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/arrow-left-right.svg);mask-image:url(https://unpkg.com/lucide-static/icons/arrow-left-right.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
+          </button>
+          <button onClick="{{ togglePersona }}" style="background:#ffffff;border:1px solid #d4d4d4;border-radius:9999px;padding:7px 11px;font-size:11px;font-weight:800;color:#121212;font-family:inherit;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08)" style-hover="border-color:#121212">{{ personaLabel }}</button>
+        </div>
+      </div>
+
+      <div style="background:#ffffff;border-radius:10px;padding:11px 13px;box-shadow:0 2px 10px rgba(0,0,0,0.09)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
+          <div style="font-size:12px;font-weight:800;color:#121212">{{ phaseTitle }}</div>
+          <div style="font-size:11px;color:#6b6b6b;font-weight:600">{{ phaseSwitch }}</div>
+        </div>
+        <div style="display:flex;gap:3px;height:4px">
+          <div style="flex:{{ barDone }};border-radius:2px;background:#ff6f0f"></div>
+          <div style="flex:{{ barLeft }};border-radius:2px;background:#e0e0e0"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px">
+          <div style="font-size:10px;color:#9b9b9b;font-weight:700">{{ ratioLabel }}</div>
+          <div style="font-size:10px;color:#c24f00;font-weight:700">{{ ratioVerdict }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;z-index:25;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 16px 12px">
+      <div style="position:relative;display:{{ pipDisplay }};height:min(138px, 100%);width:auto;aspect-ratio:98 / 138;min-height:0;border-radius:12px;overflow:hidden;background:#e4e4e4;box-shadow:0 8px 24px rgba(0,0,0,0.18);flex:none;opacity:{{ pipOpacity }};transition:opacity 200ms ease-out;pointer-events:{{ pipEvents }}">
+        <sc-if value="{{ notSwapped }}" hint-placeholder-val="{{ true }}">
+          <image-slot id="vc-self" shape="rounded" radius="12" placeholder="내 영상"></image-slot>
+        </sc-if>
+        <sc-if value="{{ swapped }}" hint-placeholder-val="{{ false }}">
+          <image-slot id="vc-remote" shape="rounded" radius="12" placeholder="상대방 영상"></image-slot>
+        </sc-if>
+        <button onClick="{{ toggleSwap }}" title="화면 반전" style="position:absolute;top:6px;left:6px;z-index:3;width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.92);color:#121212;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.2)">
+          <div style="width:16px;height:16px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/shuffle.svg);mask-image:url(https://unpkg.com/lucide-static/icons/shuffle.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
+        </button>
+      </div>
+    </div>
+
+    <div style="position:relative;z-index:20;background:#ffffff;border-radius:20px 20px 0 0;box-shadow:0 -8px 28px rgba(0,0,0,0.14);display:flex;flex-direction:column;flex:none;height:{{ sheetHeight }};overflow:hidden">
+      <div onPointerDown="{{ dragStart }}" onClick="{{ cycleSheet }}" style="flex:none;cursor:grab;padding:10px 16px 8px;display:flex;flex-direction:column;gap:8px;touch-action:none">
+        <div style="width:40px;height:4px;border-radius:3px;background:#d4d4d4;margin:0 auto"></div>
+        <div style="display:flex;align-items:center;gap:9px">
+          <div style="width:22px;height:22px;border-radius:50%;background:#ff6f0f;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none">AI</div>
+          <button onClick="{{ openCoach }}" style="flex:none;border:none;background:{{ coachTabBg }};color:{{ coachTabFg }};border-radius:9999px;padding:6px 11px;font-size:11px;font-weight:800;font-family:inherit;cursor:pointer">AI Coach</button>
+          <div style="flex:1;min-width:0;font-size:12px;color:#6b6b6b;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ peekLine }}</div>
+          <button onClick="{{ openChat }}" style="flex:none;position:relative;border:none;background:{{ chatTabBg }};color:{{ chatTabFg }};border-radius:9999px;padding:6px 11px;font-size:11px;font-weight:800;font-family:inherit;cursor:pointer">{{ chatTabLabel }}</button>
+          <div style="font-size:11px;color:#9b9b9b;font-weight:700;flex:none">{{ sheetHint }}</div>
+        </div>
+      </div>
+
+      <sc-if value="{{ chatTab }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div ref="{{ listRef }}" class="vc-scroll" style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;padding:4px 16px 10px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ messages }}" as="m" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:{{ m.align }}">
+                <div style="max-width:76%;padding:9px 13px;border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:13px;line-height:1.45;font-weight:500">{{ m.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:none;display:flex;align-items:center;gap:8px;padding:10px 16px 14px;border-top:1px solid #ececec">
+            <input value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}" placeholder="{{ chatPlaceholder }}" style="flex:1;min-width:0;border:none;background:#f4f4f4;border-radius:9999px;padding:12px 15px;font-size:13px;font-family:inherit;color:#121212;outline:none" />
+            <button onClick="{{ send }}" title="보내기" style="flex:none;width:40px;height:40px;border-radius:50%;border:none;background:#ff6f0f;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center">
+              <div style="width:17px;height:17px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/send.svg);mask-image:url(https://unpkg.com/lucide-static/icons/send.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ coachTab }}" hint-placeholder-val="{{ true }}">
+      <div class="vc-scroll" style="flex:1;overflow-y:auto;scrollbar-width:none;padding:6px 16px 40px;mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 28px),transparent 100%);-webkit-mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 28px),transparent 100%)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9b9b9b;text-transform:uppercase;margin:6px 0 6px">{{ askLabel }}</div>
+        <div style="font-size:16px;font-weight:700;line-height:1.4;margin-bottom:14px;color:#121212">{{ suggestion }}</div>
+
+        <div style="background:#f4f4f4;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px">
+            <div style="width:18px;height:18px;border-radius:50%;background:#ff6f0f;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px">1</div>
+            <div style="font-size:13px;line-height:1.45;color:#121212">{{ hint1 }}</div>
+          </div>
+          <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:10px">
+              <div style="width:18px;height:18px;border-radius:50%;background:#ff6f0f;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px">2</div>
+              <div style="font-size:13px;line-height:1.45;color:#121212">{{ hint2 }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ stage3 }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:10px">
+              <div style="width:18px;height:18px;border-radius:50%;background:#ff6f0f;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px">3</div>
+              <div style="font-size:13px;line-height:1.45;color:#121212">{{ hint3 }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ canEscalate }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ escalate }}" style="align-self:flex-start;background:none;border:none;color:#c24f00;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;padding:2px 0">{{ escalateLabel }}</button>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;padding-top:14px;border-top:1px solid #ececec">
+          <div style="font-size:11px;font-weight:800;color:#b46a00;flex:none;margin-top:2px">{{ fixLabel }}</div>
+          <div style="font-size:12px;line-height:1.5;color:#6b6b6b"><span style="text-decoration:line-through;color:#9b9b9b">{{ wrongText }}</span> → <span style="color:#121212;font-weight:700">{{ rightText }}</span></div>
+        </div>
+
+        <div style="margin-top:18px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9b9b9b;text-transform:uppercase;margin-bottom:9px">{{ transcriptLabel }}</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:9px">
+              <div style="font-size:11px;font-weight:800;color:#c24f00;flex:none;width:42px;padding-top:1px">{{ partnerName }}</div>
+              <div style="font-size:13px;line-height:1.45;color:#4a4a4a">{{ line1 }}</div>
+            </div>
+            <div style="display:flex;gap:9px">
+              <div style="font-size:11px;font-weight:800;color:#6b6b6b;flex:none;width:42px;padding-top:1px">{{ meLabel }}</div>
+              <div style="font-size:13px;line-height:1.45;color:#4a4a4a">{{ line2 }}</div>
+            </div>
+            <div style="display:flex;gap:9px">
+              <div style="font-size:11px;font-weight:800;color:#c24f00;flex:none;width:42px;padding-top:1px">{{ partnerName }}</div>
+              <div style="font-size:13px;line-height:1.45;color:#4a4a4a">{{ line3 }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid #ececec">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9b9b9b;text-transform:uppercase;margin-bottom:9px">{{ nextLabel }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <div style="padding:7px 13px;border-radius:9999px;background:#f0f0f0;font-size:12px;font-weight:700;color:#121212">{{ topic1 }}</div>
+            <div style="padding:7px 13px;border-radius:9999px;background:#f0f0f0;font-size:12px;font-weight:700;color:#121212">{{ topic2 }}</div>
+            <div style="padding:7px 13px;border-radius:9999px;background:#f0f0f0;font-size:12px;font-weight:700;color:#121212">{{ topic3 }}</div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+
+    <div style="position:relative;z-index:30;flex:none;background:#ffffff;border-top:1px solid #ececec;padding:12px 18px 22px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <button onClick="{{ toggleMic }}" style="{{ micStyle }}">
+        <div style="width:19px;height:19px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/mic.svg);mask-image:url(https://unpkg.com/lucide-static/icons/mic.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:0.02em">{{ micLabel }}</div>
+      </button>
+      <button onClick="{{ toggleCam }}" style="{{ camStyle }}">
+        <div style="width:19px;height:19px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/video.svg);mask-image:url(https://unpkg.com/lucide-static/icons/video.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:0.02em">{{ camLabel }}</div>
+      </button>
+      <button onClick="{{ toggleCoach }}" style="{{ coachStyle }}">
+        <div style="width:19px;height:19px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/sparkles.svg);mask-image:url(https://unpkg.com/lucide-static/icons/sparkles.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:0.02em">COACH</div>
+      </button>
+      <button onClick="{{ toggleReport }}" style="{{ reportStyle }}">
+        <div style="width:19px;height:19px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/flag.svg);mask-image:url(https://unpkg.com/lucide-static/icons/flag.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:0.02em">{{ reportLabel }}</div>
+      </button>
+      <button onClick="{{ endCall }}" style="width:56px;height:56px;border-radius:50%;background:#f3727f;border:none;color:#fff;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+        <div style="width:19px;height:19px;background:currentColor;-webkit-mask-image:url(https://unpkg.com/lucide-static/icons/phone-off.svg);mask-image:url(https://unpkg.com/lucide-static/icons/phone-off.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:0.02em">{{ endLabel }}</div>
+      </button>
+    </div>
+
+    <sc-if value="{{ reportOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:70;background:rgba(0,0,0,0.35);display:flex;align-items:flex-end">
+        <div style="width:100%;background:#ffffff;border-radius:20px 20px 0 0;padding:20px 18px 26px;box-shadow:0 -8px 28px rgba(0,0,0,0.2)">
+          <div style="width:40px;height:4px;border-radius:3px;background:#d4d4d4;margin:0 auto 16px"></div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.01em;margin-bottom:4px;color:#121212">{{ reportTitle }}</div>
+          <div style="font-size:12px;color:#9b9b9b;font-weight:500;margin-bottom:16px">{{ reportSub }}</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="padding:13px 0;font-size:14px;font-weight:700;color:#121212;border-bottom:1px solid #ececec">{{ r1 }}</div>
+            <div style="padding:13px 0;font-size:14px;font-weight:700;color:#121212;border-bottom:1px solid #ececec">{{ r2 }}</div>
+            <div style="padding:13px 0;font-size:14px;font-weight:700;color:#121212;border-bottom:1px solid #ececec">{{ r3 }}</div>
+            <div style="padding:13px 0;font-size:14px;font-weight:700;color:#d4485a">{{ r4 }}</div>
+          </div>
+          <button onClick="{{ toggleReport }}" style="width:100%;margin-top:18px;background:none;border:1px solid #c4c4c4;color:#121212;border-radius:500px;padding:14px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer" style-hover="border-color:#121212">{{ cancelLabel }}</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:880},&quot;startSheetState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:0,&quot;options&quot;:[0,1,2],&quot;tsType&quot;:&quot;0 | 1 | 2&quot;,&quot;section&quot;:&quot;AI Coach&quot;,&quot;label&quot;:&quot;통화 시작 시 시트 상태&quot;},&quot;onBack&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;partnerName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Alex&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;fitLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const COPY = {
+  ko: {
+    readyKicker: "Matched",
+    readyTitle: "Alex와 바로 시작",
+    readySub: "English 10분 → 한국어 10분",
+    startLabel: "바로 대화 시작",
+    readyNote: "카메라·마이크는 이미 준비됐어요",
+    connectingLabel: "연결 중…",
+    partnerMeta: "한국어 Lv.3",
+    phaseTitle: "지금은 English 파트",
+    phaseSwitch: "10:48 후 한국어로 전환",
+    ratioLabel: "말한 비율 · 나 46% / Alex 54%",
+    ratioVerdict: "균형 좋음",
+    peekLine: "이렇게 물어보세요 — What food…",
+    askLabel: "이렇게 물어보세요",
+    suggestion: "“What Korean food do you recommend to foreigners?”",
+    hint1: "맛과 관련된 단어를 하나 써보세요.",
+    hint2: "“I like Korean food because…”",
+    hint3: "“I like Korean food because it has many different flavors.”",
+    escalate1: "문장 힌트 보기",
+    escalate2: "전체 문장 보기",
+    fixLabel: "교정",
+    wrongText: "I eat it yesterday",
+    rightText: "I ate it yesterday",
+    transcriptLabel: "실시간 자막",
+    meLabel: "나",
+    line1: "So, what should I eat in Busan?",
+    line2: "Um… you should try 돼지국밥. It is, uh, pork soup.",
+    line3: "Pork soup — sounds good. Is it spicy?",
+    nextLabel: "다음 주제 추천",
+    topic1: "Street food",
+    topic2: "Busan 여행",
+    topic3: "Spicy vs mild",
+    micOn: "MIC", micOff: "음소거",
+    camOn: "CAM", camOff: "OFF",
+    reportLabel: "신고",
+    endLabel: "종료",
+    reportTitle: "신고 또는 차단",
+    reportSub: "통화는 계속 유지됩니다",
+    r1: "부적절한 언행",
+    r2: "성희롱",
+    r3: "스팸 또는 사기",
+    r4: "Alex 차단하기",
+    cancelLabel: "취소",
+    personaLabel: "한국인 시점"
+  },
+  en: {
+    readyKicker: "Matched",
+    readyTitle: "Jump in with Jimin",
+    readySub: "10 min English → 10 min Korean",
+    startLabel: "Start talking now",
+    readyNote: "Camera and mic are already set",
+    connectingLabel: "Connecting…",
+    partnerMeta: "English Lv.4",
+    phaseTitle: "Korean part now",
+    phaseSwitch: "Switches to English in 10:48",
+    ratioLabel: "Talk time · You 46% / Jimin 54%",
+    ratioVerdict: "Nicely balanced",
+    peekLine: "Try asking — 어떤 음식을…",
+    askLabel: "Try asking",
+    suggestion: "“어떤 한국 음식을 추천해요?”",
+    hint1: "Use one taste word — 맵다, 짜다, 달다.",
+    hint2: "“저는 한국 음식이 좋아요. 왜냐하면…”",
+    hint3: "“저는 한국 음식이 좋아요. 왜냐하면 맛이 다양하기 때문이에요.”",
+    escalate1: "Show sentence starter",
+    escalate2: "Show full answer",
+    fixLabel: "Fix",
+    wrongText: "저는 밥을 먹어어요",
+    rightText: "저는 밥을 먹었어요",
+    transcriptLabel: "Live transcript",
+    meLabel: "You",
+    line1: "부산에서 뭘 먹어야 해요?",
+    line2: "음… 돼지국밥? 저는 아직 안 먹어봤어요.",
+    line3: "돼지국밥 맛있어요. 조금 진해요.",
+    nextLabel: "Next topics",
+    topic1: "길거리 음식",
+    topic2: "부산 여행",
+    topic3: "매운 음식",
+    micOn: "MIC", micOff: "MUTED",
+    camOn: "CAM", camOff: "OFF",
+    reportLabel: "Report",
+    endLabel: "End",
+    reportTitle: "Report or block",
+    reportSub: "Your call keeps running",
+    r1: "Inappropriate behavior",
+    r2: "Harassment",
+    r3: "Spam or scam",
+    r4: "Block Jimin",
+    cancelLabel: "Cancel",
+    personaLabel: "Foreigner view"
+  }
+};
+
+const ROSTER = {
+  ko: [
+    { name: "Alex", meta: "한국어 Lv.3" },
+    { name: "Emily", meta: "한국어 Lv.4" },
+    { name: "Liam", meta: "한국어 Lv.2" },
+    { name: "Sofia", meta: "한국어 Lv.5" },
+    { name: "Mia", meta: "한국어 Lv.4" },
+    { name: "Ethan", meta: "한국어 Lv.6" }
+  ],
+  en: [
+    { name: "Jimin", meta: "English Lv.4" },
+    { name: "Soyeon", meta: "English Lv.5" },
+    { name: "Minho", meta: "English Lv.3" },
+    { name: "Haeun", meta: "English Lv.6" }
+  ]
+};
+
+class Component extends DCLogic {
+  state = { phase: "ready", persona: "ko", lang: "mix", pIdx: 0, swapped: false, screenH: 0, tab: "coach", unread: 0, draft: "", chat: null, sheet: 0, stage: 1, mic: true, cam: true, report: false };
+
+  componentDidMount() {
+    this._onResize = () => {
+      const h = window.innerHeight;
+      if (h && h !== this.state.screenH) this.setState({ screenH: h });
+    };
+    this._onResize();
+    window.addEventListener("resize", this._onResize);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._t);
+    window.removeEventListener("resize", this._onResize);
+    clearTimeout(this._rt);
+  }
+
+  seedChat(partner) {
+    return this.state.persona === "ko"
+      ? [
+          { me: false, text: "Hi! Ready to talk about food?" },
+          { me: true, text: "Yes! I'll send you a photo later." },
+          { me: false, text: "Nice. What did you eat today?" }
+        ]
+      : [
+          { me: false, text: "안녕하세요! 오늘 뭐 했어요?" },
+          { me: true, text: "I studied Korean for an hour." },
+          { me: false, text: "잘했어요. 천천히 말할게요." }
+        ];
+  }
+
+  pushReply() {
+    const pool = this.state.persona === "ko"
+      ? ["Got it!", "Sounds good — tell me more.", "Haha, same here.", "Can you say that again slowly?"]
+      : ["좋아요!", "조금 더 얘기해 주세요.", "저도 그래요.", "천천히 다시 말해줄래요?"];
+    const text = pool[Math.floor(Math.random() * pool.length)];
+    this._rt = setTimeout(() => {
+      const chat = (this.state.chat || this.seedChat()).concat([{ me: false, text: text }]);
+      this.setState((st) => ({ chat: chat, unread: st.tab === "chat" ? 0 : st.unread + 1 }));
+    }, 900);
+  }
+
+  sheetSteps() {
+    const h = this.state.screenH;
+    if (!h) return [56, 324, 540];
+    return [56, Math.round(h * 0.40), Math.round(h * 0.62)];
+  }
+
+  ctrl(active, bg, fg) {
+    return "width:56px;height:56px;border-radius:50%;border:none;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;" +
+      (active ? "background:" + bg + ";color:" + (fg || "#000") + ";" : "background:#f0f0f0;color:#4a4a4a;");
+  }
+
+  setSheet(n) { this.setState({ sheet: Math.max(0, Math.min(2, n)) }); }
+
+  sendNow() {
+    const text = (this.state.draft || "").trim();
+    if (!text) return;
+    const chat = (this.state.chat || this.seedChat()).concat([{ me: true, text: text }]);
+    this.setState({ chat: chat, draft: "" });
+    this.pushReply();
+  }
+
+  componentDidUpdate() {
+    if (this._list && this.state.tab === "chat") this._list.scrollTop = this._list.scrollHeight;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const t = COPY[s.persona];
+    const steps = this.sheetSteps();
+    const heights = steps.map((v) => v + "px");
+    const bandH = (s.screenH || 844) - 148 - steps[s.sheet] - 102;
+    const pipOn = bandH >= 110 && s.sheet !== 2;
+    const sheetTarget = this.props.startSheetState ?? 0;
+    const roster = ROSTER[s.persona];
+    const partner = roster[Math.min(s.pIdx, roster.length - 1)];
+    return {
+      isReady: s.phase === "ready",
+      isConnecting: s.phase === "connecting",
+      start: () => {
+        this.setState({ phase: "connecting" });
+        this._t = setTimeout(() => this.setState({ phase: "live", sheet: sheetTarget }), 1100);
+      },
+      endCall: () => this.setState({ phase: "ready", sheet: 1, stage: 1, report: false }),
+      togglePersona: () => this.setState({ persona: s.persona === "ko" ? "en" : "ko", stage: 1 }),
+
+      sheetHeight: heights[s.sheet],
+      pipBottom: "min(calc(" + heights[s.sheet] + " + 102px), calc(100% - 300px))",
+      pipOpacity: pipOn ? "1" : "0",
+      pipEvents: pipOn ? "auto" : "none",
+      pipDisplay: pipOn ? "block" : "none",
+      sheetHint: s.sheet === 2 ? "▾" : "▴",
+      cycleSheet: () => { if (!this._dragged) this.setSheet(s.sheet === 2 ? 0 : s.sheet + 1); },
+      dragStart: (e) => {
+        const y0 = e.clientY, start = s.sheet;
+        this._dragged = false;
+        const move = (ev) => {
+          const d = y0 - ev.clientY;
+          if (Math.abs(d) > 14) this._dragged = true;
+          if (Math.abs(d) > 48) this.setSheet(start + (d > 0 ? 1 : -1));
+        };
+        const up = () => {
+          window.removeEventListener("pointermove", move);
+          window.removeEventListener("pointerup", up);
+          setTimeout(() => { this._dragged = false; }, 40);
+        };
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", up);
+      },
+      stage2: s.stage >= 2,
+      stage3: s.stage >= 3,
+      canEscalate: s.stage < 3,
+      escalate: () => this.setState({ stage: Math.min(3, s.stage + 1), sheet: Math.max(1, s.sheet) }),
+      escalateLabel: s.stage === 1 ? t.escalate1 : t.escalate2,
+      toggleMic: () => this.setState({ mic: !s.mic }),
+      toggleCam: () => this.setState({ cam: !s.cam }),
+      toggleCoach: () => this.setSheet(s.sheet === 0 ? 1 : 0),
+      toggleReport: () => this.setState({ report: !s.report }),
+      reportOpen: s.report,
+      micStyle: this.ctrl(!s.mic, "#f3727f", "#fff"),
+      camStyle: this.ctrl(!s.cam, "#f3727f", "#fff"),
+      coachStyle: this.ctrl(s.sheet > 0, "#ff6f0f", "#fff"),
+      reportStyle: this.ctrl(s.report, "#121212", "#fff"),
+      micLabel: s.mic ? t.micOn : t.micOff,
+      camLabel: s.cam ? t.camOn : t.camOff,
+      partnerName: partner.name,
+      partnerMeta: partner.meta,
+      readyKicker: t.readyKicker,
+      readyTitle: s.persona === "ko" ? partner.name + "와 바로 시작" : "Jump in with " + partner.name,
+      readySub: t.readySub,
+      startLabel: t.startLabel, readyNote: t.readyNote, connectingLabel: t.connectingLabel,
+      readySubLive: s.lang === "mix" ? t.readySub : (s.persona === "ko"
+        ? (s.lang === "en" ? "영어로 20분" : "한국어로 20분")
+        : (s.lang === "en" ? "20 min in English" : "20 min in Korean")),
+      hasBack: !!this.props.onBack,
+      coachTab: s.tab === "coach",
+      chatTab: s.tab === "chat",
+      coachTabBg: s.tab === "coach" ? "#ff6f0f" : "#f4f4f4",
+      coachTabFg: s.tab === "coach" ? "#ffffff" : "#6b6b6b",
+      chatTabBg: s.tab === "chat" ? "#ff6f0f" : "#f4f4f4",
+      chatTabFg: s.tab === "chat" ? "#ffffff" : "#6b6b6b",
+      chatTabLabel: s.persona === "ko"
+        ? (s.unread ? "채팅 " + s.unread : "채팅")
+        : (s.unread ? "Chat " + s.unread : "Chat"),
+      openChat: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.setState({ tab: "chat", unread: 0, sheet: Math.max(1, s.sheet) }); },
+      openCoach: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.setState({ tab: "coach", sheet: Math.max(1, s.sheet) }); },
+      messages: (s.chat || this.seedChat()).map((m) => ({
+        text: m.text,
+        align: m.me ? "flex-end" : "flex-start",
+        bg: m.me ? "#ff6f0f" : "#f4f4f4",
+        fg: m.me ? "#ffffff" : "#121212",
+        radius: m.me ? "14px 14px 4px 14px" : "14px 14px 14px 4px"
+      })),
+      draft: s.draft,
+      chatPlaceholder: s.persona === "ko" ? "메시지 입력" : "Write a message",
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onKey: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendNow(); } },
+      send: () => this.sendNow(),
+      listRef: (el) => { this._list = el; },
+      swapped: s.swapped,
+      notSwapped: !s.swapped,
+      toggleSwap: () => this.setState({ swapped: !s.swapped }),
+      shuffle: () => {
+        const n = ROSTER[s.persona].length;
+        let i = s.pIdx;
+        while (n > 1 && i === s.pIdx) i = Math.floor(Math.random() * n);
+        this.setState({ pIdx: i, stage: 1 });
+      },
+      back: this.props.onBack,
+      langPickLabel: s.persona === "ko" ? "대화 언어 고르기" : "Pick your call language",
+      langOptions: [
+        { key: "mix", ko: "영어+한국어", en: "Both" },
+        { key: "en", ko: "영어만", en: "English" },
+        { key: "ko", ko: "한국어만", en: "Korean" }
+      ].map((o) => {
+        const on = s.lang === o.key;
+        return {
+          label: s.persona === "ko" ? o.ko : o.en,
+          bg: on ? "#ff6f0f" : "transparent",
+          fg: on ? "#ffffff" : "#6b6b6b",
+          pick: () => this.setState({ lang: o.key })
+        };
+      }),
+      barDone: s.lang === "mix" ? 2.6 : 2.2,
+      barLeft: s.lang === "mix" ? 2.5 : 2.8,
+
+
+      phaseTitle: s.lang === "mix" ? t.phaseTitle : (s.lang === "en" ? (s.persona === "ko" ? "English 전용 통화" : "English-only call") : (s.persona === "ko" ? "한국어 전용 통화" : "Korean-only call")),
+      phaseSwitch: s.lang === "mix" ? t.phaseSwitch : (s.persona === "ko" ? "남은 시간 10:48" : "10:48 left"),
+      ratioLabel: s.persona === "ko" ? "말한 비율 · 나 46% / " + partner.name + " 54%" : "Talk time · You 46% / " + partner.name + " 54%",
+      ratioVerdict: t.ratioVerdict,
+      peekLine: s.tab === "chat"
+        ? (() => { const c = s.chat || this.seedChat(); return c.length ? (c[c.length - 1].me ? (s.persona === "ko" ? "나: " : "You: ") : partner.name + ": ") + c[c.length - 1].text : t.peekLine; })()
+        : t.peekLine,
+      askLabel: t.askLabel, suggestion: t.suggestion,
+      hint1: t.hint1, hint2: t.hint2, hint3: t.hint3,
+      fixLabel: t.fixLabel, wrongText: t.wrongText, rightText: t.rightText,
+      transcriptLabel: t.transcriptLabel, meLabel: t.meLabel,
+      line1: t.line1, line2: t.line2, line3: t.line3,
+      nextLabel: t.nextLabel, topic1: t.topic1, topic2: t.topic2, topic3: t.topic3,
+      reportLabel: t.reportLabel, endLabel: t.endLabel,
+      reportTitle: t.reportTitle, reportSub: t.reportSub,
+      r1: t.r1, r2: t.r2, r3: t.r3,
+      r4: s.persona === "ko" ? partner.name + " 차단하기" : "Block " + partner.name,
+      cancelLabel: t.cancelLabel,
+      personaLabel: t.personaLabel
+    };
+  }
+}
+
+</script>
+</body>
+</html>
