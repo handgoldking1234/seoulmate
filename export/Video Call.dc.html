@@ -34,7 +34,7 @@
     </sc-if>
     <sc-if value="{{ swapped }}" hint-placeholder-val="{{ false }}">
       <div style="position:absolute;inset:0;background:#e0e0e0">
-        <image-slot id="vc-self" shape="rect" placeholder="내 영상" src="https://images.unsplash.com/photo-1645963053605-25f01c33ca02?w=800&q=85&auto=format&fit=crop&crop=faces" credit="Ethan Rougon" credit-href="https://unsplash.com/@ethanethan"></image-slot>
+        <image-slot id="vc-self" shape="rect" placeholder="내 영상" src="./me.jpg"></image-slot>
       </div>
     </sc-if>
     <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(255,255,255,0.35) 20%,rgba(255,255,255,0) 42%,rgba(255,255,255,0.7) 76%,rgba(255,255,255,0.95) 100%);pointer-events:none"></div>
@@ -109,7 +109,7 @@
     <div style="position:relative;z-index:25;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 16px 12px">
       <div style="position:relative;display:{{ pipDisplay }};height:min(138px, 100%);width:auto;aspect-ratio:98 / 138;min-height:0;border-radius:12px;overflow:hidden;background:#e4e4e4;box-shadow:0 8px 24px rgba(0,0,0,0.18);flex:none;opacity:{{ pipOpacity }};transition:opacity 200ms ease-out;pointer-events:{{ pipEvents }}">
         <sc-if value="{{ notSwapped }}" hint-placeholder-val="{{ true }}">
-          <image-slot id="vc-self" shape="rounded" radius="12" placeholder="내 영상" src="https://images.unsplash.com/photo-1645963053605-25f01c33ca02?w=800&q=85&auto=format&fit=crop&crop=faces" credit="Ethan Rougon" credit-href="https://unsplash.com/@ethanethan"></image-slot>
+          <image-slot id="vc-self" shape="rounded" radius="12" placeholder="내 영상" src="./me.jpg"></image-slot>
         </sc-if>
         <sc-if value="{{ swapped }}" hint-placeholder-val="{{ false }}">
           <image-slot id="vc-remote" shape="rounded" radius="12" placeholder="상대방 영상" src="{{ partnerVideo }}" credit="{{ partnerCredit }}" credit-href="{{ partnerCreditHref }}"></image-slot>
